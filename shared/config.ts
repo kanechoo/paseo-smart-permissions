@@ -13,7 +13,7 @@ export interface UserRule {
 }
 
 export const SETTINGS_ID = "smart-permissions-settings";
-export const SETTINGS_VERSION = 2;
+export const SETTINGS_VERSION = 3;
 
 export const UserRuleSchema = z.object({
   id: z.string(),
@@ -28,7 +28,7 @@ export const UserRuleSchema = z.object({
 
 export const SettingsSchema = z.object({
   enabled: z.boolean().default(true),
-  language: z.enum(["system", "zh", "en"]).default("system"),
+  language: z.enum(["zh", "en"]).default("en"),
   layaEnabled: z.boolean().default(false),
   layaEndpoint: z.string().default("http://127.0.0.1:17890/decide"),
   layaToken: z.string().default(""),
@@ -50,7 +50,11 @@ export const SettingsSchema = z.object({
 export type PluginSettings = z.infer<typeof SettingsSchema>;
 
 export function parseSettings(input: unknown): PluginSettings {
-  return SettingsSchema.parse(input ?? {});
+  const raw = (input ?? {}) as Record<string, unknown>;
+  // Pre-v3 stored "system" (or garbage): fold to the new default instead of
+  // throwing, so old host values can never brick a save.
+  const language = raw.language === "zh" || raw.language === "en" ? raw.language : "en";
+  return SettingsSchema.parse({ ...raw, language });
 }
 
 export function defaultSettings(): PluginSettings {

@@ -41,9 +41,10 @@ describe("cache TTL in seconds (v2)", () => {
   });
   it("migrates stored v1 milliseconds", async () => {
     const { migrateSettings } = await import("../shared/settings-def.js");
-    expect(migrateSettings({ cacheTtlMs: 120000 })).toEqual({ cacheTtlSec: 120 });
-    expect(migrateSettings({ cacheTtlMs: 1500 })).toEqual({ cacheTtlSec: 2 });
-    expect(migrateSettings({ cacheTtlSec: 30, cacheTtlMs: 120000 })).toEqual({ cacheTtlSec: 30 });
+    expect(migrateSettings({ cacheTtlMs: 120000 })).toEqual({ cacheTtlSec: 120, language: "en" });
+    expect(migrateSettings({ cacheTtlMs: 1500 })).toEqual({ cacheTtlSec: 2, language: "en" });
+    expect(migrateSettings({ cacheTtlSec: 30, cacheTtlMs: 120000 })).toEqual({ cacheTtlSec: 30, language: "en" });
+    expect(migrateSettings({ language: "zh", cacheTtlMs: 120000 })).toEqual({ language: "zh", cacheTtlSec: 120 });
     expect(migrateSettings(null)).toEqual({});
   });
 });

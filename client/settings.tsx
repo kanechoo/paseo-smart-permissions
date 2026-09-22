@@ -12,7 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { coerceUserRules, validateUserRules, type PluginSettings, type UserRule } from "../shared/config.js";
 import { ConfigUpdateRpc, StatsRpc } from "../shared/rpc.js";
 import { applySettingsDraft, ruleHasCondition, smartPermissionsSettings } from "../shared/settings-def.js";
-import { resolveLang, t, type LangSetting } from "./i18n.js";
+import { resolveLang, t, type Lang } from "./i18n.js";
 import { friendlyAdvisor } from "./advisor-label.js";
 
 type Draft = { text: Record<string, string>; toggles: Record<string, boolean>; rules: UserRule[] };
@@ -27,7 +27,7 @@ const BOOL_KEYS = ["enabled", "jevEnabled", "layaEnabled", "learningEnabled"] as
 function seed(values: PluginSettings): Draft {
   const rec = values as unknown as Record<string, unknown>;
   const text: Record<string, string> = { defaultPolicy: String(rec.defaultPolicy ?? "ask") };
-  for (const k of TEXT_KEYS) text[k] = String(rec[k] ?? (k === "language" ? "system" : ""));
+  for (const k of TEXT_KEYS) text[k] = String(rec[k] ?? (k === "language" ? "en" : ""));
   const toggles: Record<string, boolean> = {};
   for (const k of BOOL_KEYS) toggles[k] = Boolean(rec[k]);
   return { text, toggles, rules: coerceUserRules(rec.userRules) };
@@ -37,7 +37,7 @@ function same(a: Draft, b: Draft): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-export function SettingsPanel({ theme, layout, embedded }: PluginSurfaceProps & { embedded?: boolean }) {
+export function SettingsPanel({ theme, layout, embedded, onPreviewLanguage }: PluginSurfaceProps & { embedded?: boolean; onPreviewLanguage?: (lang: Lang | undefined) => void }) {
   const c = theme.colors;
   const settings = useSettings(smartPermissionsSettings);
   const callUpdate = useRpc(ConfigUpdateRpc);
@@ -74,10 +74,16 @@ export function SettingsPanel({ theme, layout, embedded }: PluginSurfaceProps & 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings.status]);
 
-  const lang = resolveLang((draft?.text.language as LangSetting | undefined) ?? "system");
+  const lang = resolveLang(draft?.text.language);
 
   const compact = layout?.compact === true;
   const ruleCellWidth = compact ? "100%" : "50%";
+
+  // Let an embedding surface (dashboard) preview the draft language before save.
+  const draftLang = (draft?.text.language === "zh" || draft?.text.language === "en" ? draft.text.language : undefined) as Lang | undefined;
+  useEffect(() => {
+    onPreviewLanguage?.(draftLang);
+  }, [draftLang, onPreviewLanguage]);
 
   const s = useMemo(() => ({
     wrap: { paddingBottom: 32 },
@@ -96,27 +102,27 @@ export function SettingsPanel({ theme, layout, embedded }: PluginSurfaceProps & 
     fieldGap: { marginTop: 14 },
     switchRow: { flexDirection: "row" as const, alignItems: "center" as const, justifyContent: "space-between" as const },
     switchText: { flex: 1, paddingRight: 12 },
-    saveBtn: { marginTop: 18, backgroundColor: c.accent, borderRadius: 10, paddingVertical: 12, alignItems: "center" as const, opacity: 1 },
+    saveBtn: { marginTop: 18, backgroundColor: c.surface2, borderWidth: 1, borderColor: c.border, borderRadius: 10, paddingVertical: 12, alignItems: "center" as const, opacity: 1 },
     saveBtnDisabled: { opacity: 0.5 },
-    saveText: { color: c.accentForeground, fontSize: 15, fontWeight: "bold" as const },
+    saveText: { color: c.foreground, fontSize: 15, fontWeight: "bold" as const },
     msgOk: { color: c.statusSuccess, fontSize: 12, marginTop: 8 },
     msgErr: { color: c.statusDanger, fontSize: 12, marginTop: 8 },
     dirty: { color: c.statusWarning, fontSize: 12, marginTop: 8 },
     linkBtn: { marginTop: 6 },
-    linkText: { color: c.accent, fontSize: 12 },
+    linkText: { color: c.foreground, fontSize: 12, textDecorationLine: "underline" as const },
     rulesGrid: { flexDirection: "row" as const, flexWrap: "wrap" as const, marginHorizontal: -4, marginTop: 4 },
     ruleCell: { paddingHorizontal: 4, marginTop: 8 },
     ruleCard: { flex: 1, backgroundColor: c.surface0, borderWidth: 1, borderColor: c.border, borderRadius: 8, padding: 10 },
     ruleHead: { flexDirection: "row" as const, alignItems: "center" as const, justifyContent: "space-between" as const },
-    badgeAllow: { backgroundColor: c.statusSuccess, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
-    badgeAsk: { backgroundColor: c.statusWarning, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
-    badgeDeny: { backgroundColor: c.statusDanger, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
-    badgeText: { color: "#fff", fontSize: 12, fontWeight: "bold" as const },
+    badgeAllow: { borderWidth: 1, borderColor: c.statusSuccess, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
+    badgeAsk: { borderWidth: 1, borderColor: c.statusWarning, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
+    badgeDeny: { borderWidth: 1, borderColor: c.statusDanger, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 },
+    badgeText: { fontSize: 12, fontWeight: "bold" as const },
     ruleSummary: { color: c.foreground, fontSize: 12, marginTop: 6, lineHeight: 17 },
     deleteBtn: { paddingHorizontal: 8, paddingVertical: 6 },
     deleteText: { color: c.statusDanger, fontSize: 12 },
-    addBtn: { marginTop: 12, backgroundColor: c.surface0, borderWidth: 1, borderColor: c.accent, borderRadius: 8, paddingVertical: 9, alignItems: "center" as const },
-    addText: { color: c.accent, fontSize: 14, fontWeight: "600" as const },
+    addBtn: { marginTop: 12, backgroundColor: c.surface0, borderWidth: 1, borderColor: c.border, borderRadius: 8, paddingVertical: 9, alignItems: "center" as const },
+    addText: { color: c.foreground, fontSize: 14, fontWeight: "600" as const },
   }), [c]);
 
   if (settings.status === "loading" || !draft) {
@@ -139,10 +145,10 @@ export function SettingsPanel({ theme, layout, embedded }: PluginSurfaceProps & 
         return (
           <Pressable
             key={o.v} accessibilityRole="button" accessibilityLabel={`${labelPrefix}-${o.v}`}
-            style={[s.segOpt, active ? { backgroundColor: c.accent } : null]}
+            style={[s.segOpt, active ? { backgroundColor: c.surface2 } : null]}
             onPress={() => onPick(o.v)}
           >
-            <Text style={[s.segOptText, { color: active ? c.accentForeground : c.foregroundMuted }]}>
+            <Text style={[s.segOptText, { color: active ? c.foreground : c.foregroundMuted, fontWeight: active ? "600" as const : "400" as const }]}>
               {o.label}
             </Text>
           </Pressable>
@@ -161,8 +167,8 @@ export function SettingsPanel({ theme, layout, embedded }: PluginSurfaceProps & 
         accessibilityLabel={`toggle-${key}`}
         value={draft.toggles[key] === true}
         onValueChange={(v) => setToggle(key, v)}
-        trackColor={{ false: c.surface2, true: c.accent }}
-        thumbColor={draft.toggles[key] ? c.accentForeground : c.foregroundMuted}
+        trackColor={{ false: c.surface2, true: c.foregroundMuted }}
+        thumbColor={draft.toggles[key] ? c.foreground : c.foregroundMuted}
       />
     </View>
   );
@@ -277,7 +283,7 @@ export function SettingsPanel({ theme, layout, embedded }: PluginSurfaceProps & 
 
   const advisor = friendlyAdvisor({ raw: live.data?.laya, display: (live.data as { advisor?: string } | undefined)?.advisor });
   const engineOn = live.data?.enabled ?? null;
-  const langVal = ["system", "zh", "en"].includes(draft.text.language) ? draft.text.language : "system";
+  const langVal = draft.text.language === "zh" ? "zh" : "en";
 
   const body = (
     <>
@@ -298,7 +304,7 @@ export function SettingsPanel({ theme, layout, embedded }: PluginSurfaceProps & 
             <Text style={s.label}>{t(lang, "settings.langLabel")}</Text>
             <Text style={s.desc}>{t(lang, "settings.langDesc")}</Text>
             {seg(langVal,
-              [{ v: "system", label: t(lang, "settings.langSystem") }, { v: "zh", label: "中文" }, { v: "en", label: "English" }],
+              [{ v: "zh", label: "中文" }, { v: "en", label: "English" }],
               (v) => setText("language")(v), "pick-lang")}
           </View>
           <View style={s.fieldGap}>
@@ -328,7 +334,7 @@ export function SettingsPanel({ theme, layout, embedded }: PluginSurfaceProps & 
               <View style={s.ruleCard}>
                 <View style={s.ruleHead}>
                   <View style={r.effect === "allow" ? s.badgeAllow : r.effect === "ask" ? s.badgeAsk : s.badgeDeny}>
-                    <Text style={s.badgeText}>
+                    <Text style={[s.badgeText, { color: r.effect === "allow" ? c.statusSuccess : r.effect === "ask" ? c.statusWarning : c.statusDanger }]}>
                       {r.effect === "allow" ? t(lang, "rules.allow") : r.effect === "ask" ? t(lang, "rules.ask") : t(lang, "rules.deny")}
                     </Text>
                   </View>

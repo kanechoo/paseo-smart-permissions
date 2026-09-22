@@ -12,6 +12,8 @@ export function migrateSettings(values: unknown): unknown {
     if (v.cacheTtlSec === undefined) v.cacheTtlSec = Math.max(0, Math.round(v.cacheTtlMs / 1000));
     delete v.cacheTtlMs;
   }
+  // v2 -> v3: "system" language removed; fall back to English default.
+  if (v.language !== "zh" && v.language !== "en") v.language = "en";
   return v;
 }
 
@@ -50,7 +52,7 @@ export function applySettingsDraft(
   }
   for (const k of boolKeys) if (toggles[k] !== undefined) next[k] = toggles[k];
   if (text.defaultPolicy === "ask" || text.defaultPolicy === "deny") next.defaultPolicy = text.defaultPolicy;
-  if (text.language === "system" || text.language === "zh" || text.language === "en") next.language = text.language;
+  if (text.language === "zh" || text.language === "en") next.language = text.language;
   if (rules !== undefined) {
     const { rules: clean, issues } = validateUserRules(rules);
     if (issues.length > 0) {

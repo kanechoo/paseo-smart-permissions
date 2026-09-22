@@ -14,13 +14,13 @@ describe("i18n", () => {
     const zhBlock = src.slice(src.indexOf("const zh"));
     for (const k of enKeys) expect(zhBlock).toContain(`"${k}"`);
   });
-  it("detect/resolve: node (no navigator) -> en; explicit respected", async () => {
-    const { detectLang, resolveLang } = await import("../client/i18n.js");
-    expect(detectLang()).toBe("en");
+  it("resolve: zh respected, everything else (legacy system/undefined/garbage) -> en", async () => {
+    const { resolveLang } = await import("../client/i18n.js");
     expect(resolveLang("zh")).toBe("zh");
     expect(resolveLang("en")).toBe("en");
     expect(resolveLang("system")).toBe("en");
     expect(resolveLang(undefined)).toBe("en");
+    expect(resolveLang("fr")).toBe("en");
   });
   it("t() returns strings for both langs", async () => {
     const { t } = await import("../client/i18n.js");
@@ -30,11 +30,20 @@ describe("i18n", () => {
 });
 
 describe("language setting plumbing", () => {
-  it("schema defaults to system", () => {
-    expect(defaultSettings().language).toBe("system");
+  it("schema defaults to en", () => {
+    expect(defaultSettings().language).toBe("en");
   });
-  it("draft applies valid language, ignores garbage", () => {
+  it("draft applies zh/en, ignores garbage", () => {
     expect(applySettingsDraft(defaultSettings(), { language: "zh" }, {}).language).toBe("zh");
-    expect(applySettingsDraft(defaultSettings(), { language: "fr" }, {}).language).toBe("system");
+    expect(applySettingsDraft(defaultSettings(), { language: "en" }, {}).language).toBe("en");
+    expect(applySettingsDraft(defaultSettings(), { language: "fr" }, {}).language).toBe("en");
+    expect(applySettingsDraft(defaultSettings(), { language: "system" }, {}).language).toBe("en");
+  });
+  it("legacy stored values never brick a save (system/garbage -> en)", async () => {
+    const { migrateSettings } = await import("../shared/settings-def.js");
+    const { parseSettings } = await import("../shared/config.js");
+    expect((migrateSettings({ language: "system" }) as { language: string }).language).toBe("en");
+    expect(parseSettings({ language: "system" }).language).toBe("en");
+    expect(parseSettings({}).language).toBe("en");
   });
 });

@@ -10,7 +10,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { RecentRpc, StatsRpc } from "../shared/rpc.js";
 import { SettingsPanel } from "./settings.js";
 import { smartPermissionsSettings } from "../shared/settings-def.js";
-import { resolveLang, t, type LangSetting } from "./i18n.js";
+import { resolveLang, t, type Lang } from "./i18n.js";
 import { friendlyAdvisor, statsAdvisorLabel } from "./advisor-label.js";
 
 const RECENT_COLLAPSED_COUNT = 8;
@@ -19,11 +19,15 @@ export function MonitorSurface({ theme, layout, host }: PluginSurfaceProps) {
   const callStats = useRpc(StatsRpc);
   const callRecent = useRpc(RecentRpc);
   const hostSettings = useSettings(smartPermissionsSettings);
-  const lang = resolveLang(
-    (hostSettings.status === "ready"
+  // Live language preview from the embedded settings panel (unsaved draft).
+  // Falls back to the saved store value when the panel hasn't picked one yet.
+  const [previewLang, setPreviewLang] = useState<Lang | undefined>(undefined);
+  const storeLang = (
+    hostSettings.status === "ready"
       ? (hostSettings.values as unknown as Record<string, unknown>).language
-      : "system") as LangSetting | undefined,
-  );
+      : undefined
+  ) as string | undefined;
+  const lang = resolveLang(previewLang ?? storeLang);
   const stats = useQuery({ queryKey: ["sp-stats"], queryFn: () => callStats({}), refetchInterval: 5000 });
   const recent = useQuery({ queryKey: ["sp-recent"], queryFn: () => callRecent({ limit: 30 }), refetchInterval: 5000 });
   const [refreshedAt, setRefreshedAt] = useState<string | null>(null);
@@ -43,18 +47,20 @@ export function MonitorSurface({ theme, layout, host }: PluginSurfaceProps) {
     button: {
       alignSelf: "flex-start" as const, paddingVertical: 6, paddingHorizontal: 14,
       marginTop: 12,
-      borderWidth: 1, borderColor: theme.colors.accent, borderRadius: 6,
+      borderWidth: 1, borderColor: theme.colors.border, borderRadius: 6,
       backgroundColor: "transparent",
     },
-    buttonText: { color: theme.colors.accent, fontSize: 13 },
+    buttonText: { color: theme.colors.foreground, fontSize: 13 },
     refreshed: { color: theme.colors.foreground, fontSize: 12, opacity: 0.6, marginLeft: 8, alignSelf: "center" as const },
     buttonRow: { flexDirection: "row" as const, alignItems: "center" as const, marginTop: 4 },
+    settingsBody: { marginTop: 8 },
     linkBtn: { marginTop: 8, alignSelf: "flex-start" as const },
-    linkText: { color: theme.colors.accent, fontSize: 12 },
+    linkText: { color: theme.colors.foreground, fontSize: 12, textDecorationLine: "underline" as const },
   }), [theme, layout.compact]);
 
   const entries = recent.data?.entries ?? [];
   const visibleEntries = showAllRecent ? entries : entries.slice(0, RECENT_COLLAPSED_COUNT);
+
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content} showsVerticalScrollIndicator>
@@ -64,7 +70,7 @@ export function MonitorSurface({ theme, layout, host }: PluginSurfaceProps) {
       <View style={styles.card}>
         {stats.data ? (
           <Text style={styles.row}>
-            {`enabled=${String(stats.data.enabled)} total=${stats.data.total} allow=${stats.data.allow} ask=${stats.data.ask} deny=${stats.data.deny} cache=${stats.data.cacheHits}/${stats.data.cacheMisses} learned=${stats.data.learnedRules} advisor=${statsAdvisorLabel(stats.data.laya, (stats.data as { advisor?: string }).advisor)}`}
+            {`${t(lang, "stats.enabled")}: ${stats.data.enabled ? t(lang, "seg.on") : t(lang, "seg.off")} · ${t(lang, "stats.total")}: ${stats.data.total} · ${t(lang, "rules.allow")}: ${stats.data.allow} · ${t(lang, "rules.ask")}: ${stats.data.ask} · ${t(lang, "rules.deny")}: ${stats.data.deny} · ${t(lang, "stats.cache")}: ${stats.data.cacheHits}/${stats.data.cacheMisses} · ${t(lang, "stats.learned")}: ${stats.data.learnedRules} · ${t(lang, "stats.advisor")}: ${statsAdvisorLabel(stats.data.laya, (stats.data as { advisor?: string }).advisor)}`}
           </Text>
         ) : <Text style={styles.row}>{t(lang, "stats.loading")}</Text>}
       </View>
@@ -127,7 +133,9 @@ export function MonitorSurface({ theme, layout, host }: PluginSurfaceProps) {
       </View>
 
       <Text style={styles.sectionTitle}>{t(lang, "sec.settings")}</Text>
-      <SettingsPanel theme={theme} layout={layout} host={host} embedded />
+      <View style={styles.settingsBody}>
+        <SettingsPanel theme={theme} layout={layout} host={host} embedded onPreviewLanguage={setPreviewLang} />
+      </View>
     </ScrollView>
   );
 }

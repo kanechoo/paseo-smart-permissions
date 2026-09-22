@@ -1,30 +1,24 @@
 /** Minimal i18n for plugin surfaces: Chinese + English, no dependencies.
  *  Rule: Paseo host exposes no locale to plugins (SDK 0.8.0 surface props carry
- *  only theme/host/layout), so the plugin owns a Language setting:
- *  system (best-effort `navigator.language` detection) / zh / en.
- *  `zh` matches any `zh*` tag; everything else (including undetectable) is English.
+ *  only theme/host/layout), so the plugin owns a Language setting: zh / en,
+ *  defaulting to English. Anything that is not explicit Chinese (including
+ *  legacy "system" values and garbage) resolves to English.
  *  Audit-trail and engine reason strings stay English on purpose: the audit log
  *  is a machine-readable record and must remain greppable. */
 export type Lang = "zh" | "en";
-export type LangSetting = "system" | Lang;
 
-export function detectLang(): Lang {
-  try {
-    const nav = (globalThis as { navigator?: { language?: unknown } }).navigator;
-    const tag = typeof nav?.language === "string" ? nav.language.toLowerCase() : "";
-    if (tag === "zh" || tag.startsWith("zh-") || tag.startsWith("zh_")) return "zh";
-  } catch { /* undetectable -> English */ }
-  return "en";
-}
-
-export function resolveLang(setting: LangSetting | undefined): Lang {
-  if (setting === "zh" || setting === "en") return setting;
-  return detectLang();
+export function resolveLang(setting: string | undefined): Lang {
+  return setting === "zh" ? "zh" : "en";
 }
 
 const en = {
   "app.title": "Smart Permissions",
   "stats.loading": "Loading stats…",
+  "stats.enabled": "Enabled",
+  "stats.total": "Total",
+  "stats.cache": "Cache",
+  "stats.learned": "Learned",
+  "stats.advisor": "Advisor",
   "action.refresh": "Refresh",
   "settings.title": "Settings",
   "settings.loading": "Loading settings…",
@@ -46,8 +40,7 @@ const en = {
   "settings.liveOff": "OFF (observe-only)",
   "settings.advisor": " · advisor=",
   "settings.langLabel": "Language",
-  "settings.langDesc": "UI language. System follows the device/browser locale when detectable.",
-  "settings.langSystem": "System",
+  "settings.langDesc": "Interface language.",
   "sec.general": "General",
   "sec.jev": "Decision model · Jev (default)",
   "sec.laya": "Decision model · Laya (opt-in)",
@@ -119,6 +112,11 @@ export type StringKey = keyof typeof en;
 const zh: Record<StringKey, string> = {
   "app.title": "智能权限",
   "stats.loading": "正在加载统计…",
+  "stats.enabled": "启用",
+  "stats.total": "总计",
+  "stats.cache": "缓存",
+  "stats.learned": "已学习",
+  "stats.advisor": "顾问",
   "action.refresh": "刷新",
   "settings.title": "设置",
   "settings.loading": "正在加载设置…",
@@ -140,8 +138,7 @@ const zh: Record<StringKey, string> = {
   "settings.liveOff": "关闭（仅观察）",
   "settings.advisor": " · 顾问=",
   "settings.langLabel": "语言",
-  "settings.langDesc": "界面语言。跟随系统时尽量使用设备/浏览器语言。",
-  "settings.langSystem": "跟随系统",
+  "settings.langDesc": "界面语言。",
   "sec.general": "通用",
   "sec.jev": "决策模型 · Jev（默认）",
   "sec.laya": "决策模型 · Laya（可选）",

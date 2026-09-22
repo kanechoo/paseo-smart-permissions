@@ -1,7 +1,7 @@
 {
   "name": "paseo-smart-permissions",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Paseo Smart Permissions: unified, default-safe permission decision plugin for Pi/OpenCode/Codex/Claude with Laya/Jev as advisory signals",
   "type": "module",
   "scripts": {

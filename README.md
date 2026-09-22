@@ -6,7 +6,6 @@ Unified, default-safe permission decisions for AI coding agents — one policy e
 **Pi / OpenCode / Codex / Claude**, running as a Paseo plugin
 (Paseo ≥ 0.8.0, Plugin SDK 0.8.0).
 
-Repository: https://github.com/kanechoo/paseo-smart-permissions
 
 Every permission request is normalized into a single intermediate representation, then
 decided deterministically as `ALLOW / ASK / DENY`:

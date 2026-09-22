@@ -1,4 +1,4 @@
-import type { AgentPermissionRequest } from "@getpaseo/protocol/agent-types";
+import type { AgentPermissionRequest } from "../server/protocol.js";
 import type { AgentInfo } from "../server/service.js";
 
 let seq = 0;

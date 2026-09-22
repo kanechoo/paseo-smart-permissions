@@ -5,7 +5,6 @@
 面向 AI 编程助手的统一、默认安全的权限决策插件——**Pi / OpenCode / Codex / Claude**
 共用一套政策引擎，运行于 Paseo 之上（Paseo ≥ 0.8.0，插件 SDK 0.8.0）。
 
-仓库地址：https://github.com/kanechoo/paseo-smart-permissions
 
 每个权限请求都会被归一成统一的中间表示，再确定性地裁决为 `ALLOW / ASK / DENY`：
 

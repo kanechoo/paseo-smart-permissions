@@ -11,8 +11,6 @@
     "build": "tsc -p tsconfig.json --noEmit && echo OK"
   },
   "dependencies": {
-    "@getpaseo/client": "0.8.0",
-    "@getpaseo/protocol": "0.8.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

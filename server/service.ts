@@ -1,8 +1,6 @@
 /** SmartPermissionsService: SDK-agnostic orchestration (fully unit-testable).
  *  index.server.ts only wires real Paseo hooks to this class. */
-import type {
-  AgentPermissionRequest, AgentPermissionResponse,
-} from "@getpaseo/protocol/agent-types";
+import type { AgentPermissionRequest, AgentPermissionResponse } from "./protocol.js";
 import { buildIR, type PermissionIR } from "./ir.js";
 import { DecisionCache } from "./cache.js";
 import { AuditLogger } from "./audit.js";

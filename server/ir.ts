@@ -1,5 +1,5 @@
 /** Unified Permission IR. The decision engine consumes ONLY this. */
-import type { AgentPermissionRequest, ToolCallDetail } from "@getpaseo/protocol/agent-types";
+import type { AgentPermissionRequest, ToolCallDetail } from "./protocol.js";
 import { analyzeCommand, isKnownSafeCommand } from "./commands.js";
 import { classifyPaths } from "./paths.js";
 import { sanitize } from "./redact.js";

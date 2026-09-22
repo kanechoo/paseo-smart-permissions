@@ -1,0 +1,28 @@
+{
+  "name": "paseo-smart-permissions",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Paseo Smart Permissions: unified, default-safe permission decision plugin for Pi/OpenCode/Codex/Claude with Laya/Jev as advisory signals",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "build": "tsc -p tsconfig.json --noEmit && echo OK"
+  },
+  "dependencies": {
+    "@getpaseo/client": "0.8.0",
+    "@getpaseo/protocol": "0.8.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@getpaseo/plugin": "0.8.0",
+    "@tanstack/react-query": "^5.90.11",
+    "@types/node": "^20.9.0",
+    "@types/react": "~19.2.0",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.6"
+  }
+}

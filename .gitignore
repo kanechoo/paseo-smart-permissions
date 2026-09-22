@@ -1,0 +1,7 @@
+node_modules/
+plans/
+docs/
+scripts/
+.vscode/
+.DS_Store
+*.log

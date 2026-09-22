@@ -176,3 +176,7 @@ provider/capability typo, or an allow/ask rule with zero match conditions.
 Each recent-decision row names it (`via Jev`, `via Laya`, `via Jev+Laya`) and the
 reason string is always attributed to the advisor that actually ran — never a stale
 provider name.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

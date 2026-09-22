@@ -3,7 +3,9 @@
 [English](README.md) | **中文**
 
 面向 AI 编程助手的统一、默认安全的权限决策插件——**Pi / OpenCode / Codex / Claude**
-共用一套政策引擎，运行于 [Paseo](https://opencode.ai) 之上（Paseo ≥ 0.8.0，插件 SDK 0.8.0）。
+共用一套政策引擎，运行于 Paseo 之上（Paseo ≥ 0.8.0，插件 SDK 0.8.0）。
+
+仓库地址：https://github.com/kanechoo/paseo-smart-permissions
 
 每个权限请求都会被归一成统一的中间表示，再确定性地裁决为 `ALLOW / ASK / DENY`：
 
@@ -59,8 +61,11 @@ agent 请求
 ## 快速开始
 
 ```bash
-paseo plugin install /path/to/paseo-smart-permissions
+paseo plugin install https://github.com/kanechoo/paseo-smart-permissions
 ```
+
+（锁定版本：追加 `--ref <tag-or-commit>`。本地 checkout 也行：
+`paseo plugin install ./paseo-smart-permissions`。）
 
 1. 打开插件面板（侧栏 **Smart Permissions**）。
 2. 在 **Jev → API key** 粘贴 key——任意 OpenCode Zen key 即可，配合免费的 `jev-1.13-free` 模型，无需其他配置。

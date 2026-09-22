@@ -3,8 +3,10 @@
 **English** | [中文](README.zh-CN.md)
 
 Unified, default-safe permission decisions for AI coding agents — one policy engine for
-**Pi / OpenCode / Codex / Claude**, running as a [Paseo](https://opencode.ai) plugin
+**Pi / OpenCode / Codex / Claude**, running as a Paseo plugin
 (Paseo ≥ 0.8.0, Plugin SDK 0.8.0).
+
+Repository: https://github.com/kanechoo/paseo-smart-permissions
 
 Every permission request is normalized into a single intermediate representation, then
 decided deterministically as `ALLOW / ASK / DENY`:
@@ -79,8 +81,11 @@ boundary-aware (`/w/project` never matches the sibling `/w/project2`).
 ## Quick start
 
 ```bash
-paseo plugin install /path/to/paseo-smart-permissions
+paseo plugin install https://github.com/kanechoo/paseo-smart-permissions
 ```
+
+(Pinning a version: append `--ref <tag-or-commit>`. A local checkout works too:
+`paseo plugin install ./paseo-smart-permissions`.)
 
 1. Open the plugin dashboard (**Smart Permissions** in the sidebar).
 2. Paste an API key into **Jev → API key** — any OpenCode Zen key works, including
